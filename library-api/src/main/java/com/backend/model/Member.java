@@ -40,7 +40,7 @@ public class Member implements UserDetails{
     private String mail;
     @Column(name = "password", nullable = false)
     private String password;
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
     @Column(name = "is_admin")
     private Boolean is_admin;

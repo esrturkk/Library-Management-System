@@ -35,8 +35,9 @@ public class Book {
     @Column(name = "published_date")
     private Date published_date;
     @Column(name = "is_available")
-    private Boolean is_available;
-    
+    private Boolean isAvailable;
+    @Column(name = "date_of_receipt")
+    private Date date_of_receipt;
     @ManyToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private Member owner;
