@@ -1,14 +1,19 @@
 package com.backend.controller;
 
 import com.backend.dto.BookCreateRequest;
+import com.backend.dto.MyBookResponse;
 import com.backend.model.Book;
+import com.backend.model.Member;
 import com.backend.repository.BookRepository;
+import com.backend.repository.MemberRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/books")
@@ -16,6 +21,9 @@ public class BookController {
 
     @Autowired
     private BookRepository bookRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @PostMapping("/create")
     public ResponseEntity<String> createBook(@RequestBody BookCreateRequest request, Authentication authentication) {
@@ -55,5 +63,32 @@ public class BookController {
         // Kitabı sil
         bookRepository.deleteById(bookId);
         return ResponseEntity.ok("Book deleted successfully with ID: " + bookId);
+    }
+
+    // Kullanıcının aldığı kitapları listeleyen endpoint
+    // Kullanıcının aldığı kitapları listeleyen endpoint
+    @GetMapping("/my-books")
+    public ResponseEntity<List<MyBookResponse>> getMyBooks(Authentication authentication) {
+        // Giriş yapmış kullanıcının bilgilerini al
+        String username = authentication.getName();
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Kullanıcının kitaplarını al
+        List<Book> books = bookRepository.findByOwner(member);
+
+        // Book nesnelerini MyBookDTO'ya dönüştür
+        List<MyBookResponse> myBookDTOs = books.stream()
+                .map(book -> new MyBookResponse(
+                        book.getId(),
+                        book.getTitle(),
+                        book.getAuthor(),
+                        book.getIsbn(),
+                        book.getPublished_date(),
+                        book.getDate_of_receipt()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(myBookDTOs);
     }
 }
